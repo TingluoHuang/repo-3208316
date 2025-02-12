@@ -1,0 +1,69 @@
+name: 24830/3208316
+run-name: "24830/3208316 v${{ github.run_id }}"
+
+on:
+  push:
+    branches:
+      - "main"
+    paths:
+      - ".github/workflows/test-2-sleep-360.yml"
+
+permissions:
+  contents: write
+
+env:
+  GIT_CREDENTIALS: "${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}"
+  VERSION: "v${{ github.run_id }}"
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create Release
+        run: |
+          curl -L -i -X POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            -d '{"tag_name":"${{ env.VERSION }}","target_commitish":"${{ github.ref_name }}","name":"${{ env.VERSION }}","body":"Description of the release","draft":false,"prerelease":false,"generate_release_notes":true}' \
+            https://api.github.com/repos/${{ github.repository }}/releases
+
+      - name: Sleep for 360s
+        continue-on-error: false
+        run: sleep 360s
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          # NOTE: In the next step, it was possible to get the tag env.VERSION without passing any value to `fetch-depth` input.
+          #        Now it's not possible.
+          #        With `fetch-depth: 0` it works.
+          #        See: https://github.com/actions/checkout/issues/2041
+          # fetch-depth: 0
+          fetch-tags: true
+
+      - name: List Tags using Git
+        continue-on-error: true
+        # NOTE: no tags are listed unless `fetch-depth: 0` is set in the previous step.
+        run: |
+          git for-each-ref refs/tags --sort=creatordate
+
+      - name: List Tags using API
+        continue-on-error: true
+        run: |
+          curl -L -i \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            https://api.github.com/repos/${{ github.repository }}/tags
+
+      - name: List Tags using cURL
+        continue-on-error: true
+        run: |
+          git ls-remote --tags https://${{ env.GIT_CREDENTIALS }}@github.com/${{ github.repository }}.git
+
+      - name: Clone Tag
+        continue-on-error: true
+        run: |
+          git clone --branch ${{ env.VERSION }} https://${{ env.GIT_CREDENTIALS }}@github.com/${{ github.repository }}.git
