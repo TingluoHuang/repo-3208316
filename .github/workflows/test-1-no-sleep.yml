@@ -45,9 +45,17 @@ jobs:
         run: |
           git config --show-origin --list
           git for-each-ref refs/tags --sort=creatordate
+          echo "1"
           export GIT_TRACE=true
+          git fetch
+          git for-each-ref refs/tags --sort=creatordate
+          echo "2"
+          git -c protocol.version=2 fetch --prune --no-recurse-submodules --depth=1 origin
+          git for-each-ref refs/tags --sort=creatordate
+          echo "3"
           git fetch --tags
           git for-each-ref refs/tags --sort=creatordate
+          echo "4"
           
 
       - name: List Tags using API
