@@ -50,7 +50,7 @@ jobs:
           #git fetch
           #git for-each-ref refs/tags --sort=creatordate
           echo "2"
-          git fetch --prune --no-recurse-submodules --depth=1 origin +dafa907d050b7aca612cb1fc3262cbe1157a41d4:refs/remotes/origin/main
+          git fetch --prune --no-recurse-submodules --depth=1 --tags origin +dafa907d050b7aca612cb1fc3262cbe1157a41d4:refs/remotes/origin/main
           git for-each-ref refs/tags --sort=creatordate
           echo "3"
           #git fetch --tags
