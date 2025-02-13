@@ -43,7 +43,12 @@ jobs:
         continue-on-error: true
         # NOTE: no tags are listed unless `fetch-depth: 0` is set in the previous step.
         run: |
+          git config --show-origin --list
           git for-each-ref refs/tags --sort=creatordate
+          export GIT_TRACE=true
+          git fetch --tags
+          git for-each-ref refs/tags --sort=creatordate
+          
 
       - name: List Tags using API
         continue-on-error: true
